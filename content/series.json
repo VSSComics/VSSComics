@@ -2,9 +2,13 @@
   "series": [
     {
       "title": "Cosmo Mickey",
-      "tagline": "A quiet swimmer is pulled into a cosmic conflict he never asked for — and a wish-granting tree that remembers everything.",
+      "tagline": "This is a story about a boy destined to destroy the entire world.\nA young king who declared war on the entire galaxy plunges countless worlds into chaos — bringing extermination to races and the gifted.\n\nAround a boy named Mikey, who lived a lonely life and had no idea he would be drawn into a conflict of cosmic proportions.\n\nA cosmic drama of revenge, love, and suffering.\nImmerse yourself in a magnificent tale of different planets and their inhabitants.\n\n",
       "cover": "/images/uploads/cover.jpg",
-      "tags": ["Sci-fi", "Coming of age", "Action"],
+      "tags": [
+        "Sci-fi",
+        "Coming of age",
+        "Action"
+      ],
       "locked": false,
       "chapters": [
         {
@@ -12,20 +16,11 @@
           "title": "Awakening",
           "pages": [
             "/images/uploads/cover.jpg",
-            "/images/uploads/p31.jpg",
-            "/images/uploads/p57.jpg",
-            "/images/uploads/p100.jpg"
+            "/images/uploads/рисунок-2-.jpg",
+            "/images/uploads/рисунок-3-.jpg"
           ]
         }
       ]
-    },
-    {
-      "title": "Untitled Series",
-      "tagline": "Slot reserved for your next project.",
-      "cover": "",
-      "tags": ["Coming soon"],
-      "locked": true,
-      "chapters": []
     }
   ]
 }
