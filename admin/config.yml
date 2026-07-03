@@ -5,7 +5,7 @@ backend:
 media_folder: "images/uploads"
 public_folder: "/images/uploads"
 
-site_url: https://YOUR-SITE-NAME.netlify.app
+site_url: https://vsscomics.netlify.app
 
 collections:
   - name: "comics"
@@ -36,4 +36,11 @@ collections:
                   - label: "Pages (in reading order)"
                     name: "pages"
                     widget: "list"
-                    field: {label: "Page image", name: "image", widget: "image"}
+                    hint: "Click Add, then in the media picker you can select multiple files at once (Ctrl/Cmd-click, or drag a whole selection in) — they'll be added in the order you pick them."
+                    field:
+                      label: "Page image"
+                      name: "image"
+                      widget: "image"
+                      media_library:
+                        config:
+                          multiple: true
