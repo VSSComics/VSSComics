@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VSSComics — Webcomics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --void: #0a0d18;
+  --surface: #12172b;
+  --surface-2: #1a2038;
+  --line: #262c47;
+  --text: #eef0f9;
+  --text-dim: #9498b8;
+  --magenta: #c13fd6;
+  --cyan: #45d9e6;
+  --coral: #ff6f5b;
+  --grad: linear-gradient(115deg, var(--magenta), var(--cyan));
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  color:var(--text);
+  font-family:'Manrope', sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{background:var(--magenta); color:#fff;}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--void);}
+::-webkit-scrollbar-thumb{background:var(--surface-2); border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:var(--line);}
+
+a{color:inherit; text-decoration:none;}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+.hidden{display:none !important;}
+
+/* ---------- Starfield canvas ---------- */
+#starfield{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 5vw;
+  background:rgba(10,13,24,0.72);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font-family:'Orbitron', sans-serif;
+  font-weight:900;
+  font-size:1.3rem;
+  letter-spacing:0.04em;
+  background:var(--grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  display:flex; align-items:center; gap:10px;
+}
+.logo::before{
+  content:"";
+  width:10px; height:10px; border-radius:50%;
+  background:var(--grad);
+  box-shadow:0 0 14px var(--magenta);
+  flex-shrink:0;
+}
+nav{display:flex; gap:34px; font-weight:600; font-size:0.92rem; color:var(--text-dim);}
+nav a{transition:color 0.2s;}
+nav a:hover{color:var(--text);}
+
+/* ---------- Views ---------- */
+.view{position:relative; z-index:1;}
+
+/* ---------- HOME ---------- */
+.hero{
+  min-height:82vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center;
+  padding:80px 6vw 40px;
+  position:relative;
+}
+.hero-ring{
+  position:absolute;
+  width:560px; height:560px;
+  border-radius:50%;
+  border:1px solid rgba(69,217,230,0.25);
+  top:50%; left:50%;
+  transform:translate(-50%,-52%);
+  animation:spin 40s linear infinite;
+  pointer-events:none;
+}
+.hero-ring::before{
+  content:"";
+  position:absolute; inset:40px;
+  border-radius:50%;
+  border:1px solid rgba(193,63,214,0.2);
+}
+@keyframes spin{ to{ transform:translate(-50%,-52%) rotate(360deg); } }
+
+.eyebrow{
+  font-size:0.78rem; letter-spacing:0.28em; text-transform:uppercase;
+  color:var(--cyan); font-weight:700; margin-bottom:22px;
+}
+.hero h1{
+  font-family:'Orbitron', sans-serif;
+  font-weight:900;
+  font-size:clamp(2.6rem, 7vw, 5.2rem);
+  line-height:1.03;
+  background:var(--grad);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 40px rgba(193,63,214,0.25));
+}
+.hero p{
+  max-width:520px;
+  margin:22px auto 34px;
+  color:var(--text-dim);
+  font-size:1.05rem;
+  line-height:1.6;
+}
+.btn-primary{
+  padding:15px 34px;
+  border-radius:100px;
+  background:var(--grad);
+  color:#fff;
+  font-weight:700;
+  font-size:0.95rem;
+  letter-spacing:0.02em;
+  box-shadow:0 8px 30px rgba(193,63,214,0.35);
+  transition:transform 0.2s, box-shadow 0.2s;
+  display:inline-block;
+}
+.btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 36px rgba(69,217,230,0.4);}
+
+/* ---------- Series grid ---------- */
+.section-label{
+  display:flex; align-items:baseline; gap:16px;
+  padding:0 6vw; margin:10px 0 28px;
+}
+.section-label h2{
+  font-family:'Orbitron', sans-serif;
+  font-size:1.5rem; font-weight:700; letter-spacing:0.02em;
+}
+.section-label span{color:var(--text-dim); font-size:0.9rem;}
+.section-label::after{
+  content:""; flex:1; height:1px; background:var(--line);
+}
+
+.series-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:26px;
+  padding:0 6vw 90px;
+}
+.series-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform 0.25s ease, border-color 0.25s ease;
+  position:relative;
+}
+.series-card:hover{ transform:translateY(-6px); border-color:var(--cyan); }
+.series-card .cover-wrap{
+  aspect-ratio:3/4; overflow:hidden; position:relative;
+}
+.series-card img{
+  width:100%; height:100%; object-fit:cover;
+  transition:transform 0.4s ease;
+}
+.series-card:hover img{transform:scale(1.06);}
+.series-card .cover-wrap::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(10,13,24,0.92), transparent 55%);
+}
+.card-body{padding:16px 18px 20px;}
+.card-body h3{font-family:'Orbitron', sans-serif; font-size:1.02rem; margin-bottom:6px;}
+.card-body p{color:var(--text-dim); font-size:0.85rem; line-height:1.5;}
+.tag-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+.tag{
+  font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em;
+  padding:4px 10px; border-radius:100px;
+  border:1px solid var(--line); color:var(--text-dim);
+}
+
+.series-card.locked{ cursor:default; opacity:0.85; }
+.series-card.locked .cover-wrap{
+  display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(193,63,214,0.18), transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(69,217,230,0.14), transparent 60%),
+    var(--surface-2);
+}
+.series-card.locked .cover-wrap::after{display:none;}
+.locked-icon{
+  font-family:'Orbitron', sans-serif;
+  font-size:0.75rem; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--text-dim); border:1px dashed var(--line);
+  padding:10px 16px; border-radius:10px;
+}
+
+/* ---------- SERIES DETAIL ---------- */
+.series-hero{
+  padding:60px 6vw 40px;
+  display:flex; gap:44px; align-items:flex-end; flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+}
+.series-hero .cover-big{
+  width:200px; aspect-ratio:3/4; border-radius:14px; overflow:hidden;
+  border:1px solid var(--line); flex-shrink:0;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.series-hero .cover-big img{width:100%; height:100%; object-fit:cover;}
+.series-hero-text h1{
+  font-family:'Orbitron', sans-serif; font-size:clamp(1.8rem,4vw,2.6rem);
+  margin-bottom:14px;
+}
+.series-hero-text p{color:var(--text-dim); max-width:560px; line-height:1.65; margin-bottom:16px;}
+.back-link{
+  display:inline-flex; align-items:center; gap:8px;
+  color:var(--text-dim); font-size:0.88rem; font-weight:600;
+  margin-bottom:26px; padding:0 6vw;
+}
+.back-link:hover{color:var(--cyan);}
+
+.chapter-list{padding:36px 6vw 90px; display:flex; flex-direction:column; gap:12px;}
+.chapter-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  transition:border-color 0.2s, transform 0.2s;
+  cursor:pointer;
+}
+.chapter-row:hover{border-color:var(--magenta); transform:translateX(4px);}
+.chapter-row .ch-left{display:flex; align-items:center; gap:18px;}
+.chapter-row .ch-num{
+  font-family:'Orbitron', sans-serif; font-weight:700; color:var(--cyan);
+  font-size:0.9rem; min-width:34px;
+}
+.chapter-row .ch-title{font-weight:700; font-size:0.98rem;}
+.chapter-row .ch-pages{color:var(--text-dim); font-size:0.82rem; margin-top:3px;}
+.chapter-row .ch-arrow{color:var(--text-dim); font-size:1.2rem; transition:transform 0.2s;}
+.chapter-row:hover .ch-arrow{transform:translateX(4px); color:var(--magenta);}
+
+/* ---------- READER ---------- */
+.reader-bar{
+  position:sticky; top:0; z-index:60;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 5vw;
+  background:rgba(10,13,24,0.85);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.reader-bar .r-left{display:flex; align-items:center; gap:16px;}
+.exit-btn{
+  width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; color:var(--text-dim);
+  transition:all 0.2s;
+}
+.exit-btn:hover{border-color:var(--coral); color:var(--coral);}
+.r-title{font-weight:700; font-size:0.92rem;}
+.r-sub{color:var(--text-dim); font-size:0.78rem;}
+.progress-track{
+  position:fixed; top:0; left:0; height:3px; background:var(--grad);
+  z-index:70; width:0%; transition:width 0.1s linear;
+}
+
+.reader-strip{
+  max-width:760px; margin:0 auto;
+  display:flex; flex-direction:column; align-items:center;
+  padding:0 0 40px;
+}
+.reader-strip img{
+  width:100%; display:block;
+}
+.page-gap{height:0px;}
+
+.reader-end{
+  max-width:760px; margin:0 auto; padding:50px 6vw 100px;
+  text-align:center;
+}
+.reader-end h3{font-family:'Orbitron', sans-serif; font-size:1.3rem; margin-bottom:10px;}
+.reader-end p{color:var(--text-dim); margin-bottom:26px;}
+.end-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+.btn-ghost{
+  padding:13px 26px; border-radius:100px; border:1px solid var(--line);
+  font-weight:600; font-size:0.88rem; color:var(--text);
+  transition:border-color 0.2s;
+}
+.btn-ghost:hover{border-color:var(--cyan);}
+
+/* ---------- Footer ---------- */
+footer{
+  padding:40px 6vw; border-top:1px solid var(--line);
+  display:flex; justify-content:space-between; align-items:center;
+  color:var(--text-dim); font-size:0.82rem; flex-wrap:wrap; gap:14px;
+}
+
+@media (max-width:640px){
+  nav{gap:18px; font-size:0.82rem;}
+  .series-hero{flex-direction:column; align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<header>
+  <div class="logo">VSSComics</div>
+  <nav>
+    <a href="#" onclick="goHome(); return false;">Home</a>
+    <a href="#library" onclick="goHome(); return false;">Library</a>
+  </nav>
+</header>
+
+<div class="progress-track" id="progressTrack"></div>
+
+<!-- ================= HOME VIEW ================= -->
+<div id="view-home" class="view">
+  <section class="hero">
+    <div class="hero-ring"></div>
+    <div class="eyebrow">Independent Webcomics</div>
+    <h1>Stories from<br>other orbits</h1>
+    <p>A home for original comics, free to read, always. Scroll in, no sign-up, no paywall — just the panels.</p>
+    <a class="btn-primary" href="#library" onclick="document.getElementById('library').scrollIntoView({behavior:'smooth'});">Start Reading</a>
+  </section>
+
+  <div id="library"></div>
+  <div class="section-label"><h2>Series</h2><span id="seriesCount"></span></div>
+  <div class="series-grid" id="seriesGrid"></div>
+</div>
+
+<!-- ================= SERIES DETAIL VIEW ================= -->
+<div id="view-series" class="view hidden">
+  <div class="back-link" style="padding-top:24px;"><a href="#" onclick="goHome(); return false;">&larr; All series</a></div>
+  <div class="series-hero" id="seriesHero"></div>
+  <div class="chapter-list" id="chapterList"></div>
+</div>
+
+<!-- ================= READER VIEW ================= -->
+<div id="view-reader" class="view hidden">
+  <div class="reader-bar">
+    <div class="r-left">
+      <button class="exit-btn" onclick="exitReader()">&times;</button>
+      <div>
+        <div class="r-title" id="readerTitle">—</div>
+        <div class="r-sub" id="readerSub">—</div>
+      </div>
+    </div>
+    <div class="r-sub" id="readerPageCount">—</div>
+  </div>
+  <div class="reader-strip" id="readerStrip"></div>
+  <div class="reader-end">
+    <h3>End of chapter</h3>
+    <p id="readerEndNote">More panels are on the way.</p>
+    <div class="end-actions">
+      <button class="btn-ghost" onclick="backToSeries()">Back to series</button>
+      <button class="btn-ghost" onclick="goHome()">All series</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>VSSComics &copy; 2026 — built by independent creators.</div>
+  <div>Vertical-scroll reading, optimized for any screen.</div>
+</footer>
+
+<script>
+/* =====================================================
+   DATA — add your own series & chapters here.
+   Each page can be a base64 data URI (like the demo) or
+   a plain image URL once you host your files elsewhere
+   (e.g. GitHub, Cloudinary, your own CDN).
+   ===================================================== */
+let SERIES = [];
+
+function slugify(str, fallbackIndex){
+  const base = (str || '').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  return base || ('series-' + fallbackIndex);
+}
+
+fetch('content/series.json')
+  .then(r => r.json())
+  .then(data => {
+    SERIES = (data.series || []).map((s, i) => ({
+      id: slugify(s.title, i),
+      title: s.title || 'Untitled series',
+      tagline: s.tagline || '',
+      cover: s.cover || '',
+      tags: s.tags || [],
+      locked: !!s.locked,
+      chapters: (s.chapters || []).map(ch => ({
+        num: ch.num,
+        title: ch.title || '',
+        pages: ch.pages || []
+      }))
+    }));
+    renderGrid();
+  })
+  .catch(err => {
+    console.error('Could not load series data', err);
+    const grid = document.getElementById('seriesGrid');
+    if(grid) grid.innerHTML = '<div style="padding:40px; color:var(--text-dim);">Could not load comics right now. Please refresh.</div>';
+  });
+
+/* ================= Starfield background ================= */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+function initStars(){
+  stars = [];
+  const count = Math.floor((canvas.width * canvas.height) / 9000);
+  for(let i=0;i<count;i++){
+    stars.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: Math.random()*1.3 + 0.2,
+      s: Math.random()*0.25 + 0.03,
+      a: Math.random()*0.6 + 0.2
+    });
+  }
+}
+function drawStars(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#0a0d18';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(const st of stars){
+    ctx.beginPath();
+    ctx.globalAlpha = st.a;
+    ctx.fillStyle = '#eef0f9';
+    ctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
+    ctx.fill();
+    st.y += st.s;
+    if(st.y > canvas.height){ st.y = 0; st.x = Math.random()*canvas.width; }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', ()=>{ resizeCanvas(); initStars(); });
+resizeCanvas(); initStars(); drawStars();
+
+/* ================= View routing ================= */
+let currentSeries = null;
+let currentChapterIndex = 0;
+
+function showView(name){
+  document.getElementById('view-home').classList.add('hidden');
+  document.getElementById('view-series').classList.add('hidden');
+  document.getElementById('view-reader').classList.add('hidden');
+  document.getElementById('view-'+name).classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'instant' in document.documentElement.style ? 'instant' : 'auto'});
+}
+
+function goHome(){
+  currentSeries = null;
+  showView('home');
+}
+
+function renderGrid(){
+  const grid = document.getElementById('seriesGrid');
+  const countLabel = document.getElementById('seriesCount');
+  countLabel.textContent = SERIES.filter(s=>!s.locked).length + ' active';
+  grid.innerHTML = '';
+  SERIES.forEach(s=>{
+    const card = document.createElement('div');
+    card.className = 'series-card' + (s.locked ? ' locked' : '');
+    if(s.locked){
+      card.innerHTML = `
+        <div class="cover-wrap"><div class="locked-icon">Coming soon</div></div>
+        <div class="card-body">
+          <h3>${s.title}</h3>
+          <p>${s.tagline}</p>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="cover-wrap"><img src="${s.cover}" alt="${s.title} cover"></div>
+        <div class="card-body">
+          <h3>${s.title}</h3>
+          <p>${s.tagline}</p>
+          <div class="tag-row">${s.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        </div>`;
+      card.onclick = ()=> openSeries(s.id);
+    }
+    grid.appendChild(card);
+  });
+}
+
+function openSeries(id){
+  const s = SERIES.find(x=>x.id===id);
+  if(!s || s.locked) return;
+  currentSeries = s;
+  const hero = document.getElementById('seriesHero');
+  hero.innerHTML = `
+    <div class="cover-big"><img src="${s.cover}" alt="${s.title}"></div>
+    <div class="series-hero-text">
+      <h1>${s.title}</h1>
+      <p>${s.tagline}</p>
+      <div class="tag-row">${s.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    </div>`;
+  const list = document.getElementById('chapterList');
+  list.innerHTML = '';
+  s.chapters.forEach((ch, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'chapter-row';
+    row.innerHTML = `
+      <div class="ch-left">
+        <div class="ch-num">${String(ch.num).padStart(2,'0')}</div>
+        <div>
+          <div class="ch-title">${ch.title}</div>
+          <div class="ch-pages">${ch.pages.length} pages</div>
+        </div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>`;
+    row.onclick = ()=> openReader(s.id, idx);
+    list.appendChild(row);
+  });
+  showView('series');
+}
+
+function backToSeries(){
+  if(currentSeries){ showView('series'); }
+  else { goHome(); }
+}
+
+function openReader(seriesId, chapterIndex){
+  const s = SERIES.find(x=>x.id===seriesId);
+  if(!s) return;
+  currentSeries = s;
+  currentChapterIndex = chapterIndex;
+  const ch = s.chapters[chapterIndex];
+  document.getElementById('readerTitle').textContent = s.title;
+  document.getElementById('readerSub').textContent = 'Chapter ' + ch.num + ' — ' + ch.title;
+  document.getElementById('readerPageCount').textContent = ch.pages.length + ' pages';
+  const strip = document.getElementById('readerStrip');
+  strip.innerHTML = '';
+  ch.pages.forEach(src=>{
+    const img = document.createElement('img');
+    img.src = src;
+    img.loading = 'lazy';
+    strip.appendChild(img);
+  });
+  const nextExists = s.chapters[chapterIndex+1];
+  document.getElementById('readerEndNote').textContent = nextExists
+    ? 'Chapter ' + s.chapters[chapterIndex+1].num + ' is up next.'
+    : 'More panels are on the way.';
+  showView('reader');
+}
+
+function exitReader(){
+  backToSeries();
+}
+
+/* scroll progress bar inside reader */
+window.addEventListener('scroll', ()=>{
+  const readerView = document.getElementById('view-reader');
+  const track = document.getElementById('progressTrack');
+  if(readerView.classList.contains('hidden')){ track.style.width = '0%'; return; }
+  const scrolled = window.scrollY;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = max > 0 ? (scrolled/max)*100 : 0;
+  track.style.width = pct + '%';
+});
+
+goHome();
+</script>
+</body>
+</html>
